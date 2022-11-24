@@ -3,12 +3,13 @@ import { Grid, Input, StyledInputLabel } from "@nextui-org/react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { Container, Row, Text, Spacer, Badge } from "@nextui-org/react";
 import { Button } from "@nextui-org/react";
-import { Auditor } from "../../types/types";
+import { Audit, Auditor } from "../../types/types";
 import { ETestsStatus } from "../../types/audit.enum";
 import NameBadge from "./nameBadge";
 import { ScopeContextType } from "../../types/context.types";
 import { Scope as ScopeType } from "../../types/types";
 import { ScopeContext } from "../../context/ScopeContext";
+import { useRouter } from "next/router";
 
 interface IFormInput {
   repository_link: string;
@@ -21,12 +22,12 @@ interface IFormInput {
   smart_contract_audited: string;
 }
 
-const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage}) => {
+const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>,audit?:Audit }> = ({setStage},audit) => {
   const {saveScope} = useContext(ScopeContext) as ScopeContextType;
   const [auditorFirstName, setAuditorFirstName] = useState("");
   const [auditorLastName, setAuditorLastName] = useState("");
   const [auditors, setAuditors] = useState<Auditor[]>([]);
-
+  const rout=useRouter();
   const appendAuditor = () => {
     setAuditors((prev) => [
       ...prev,
@@ -106,6 +107,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                     required
                     label="Repository"
                     {...field}
+                    placeholder={audit?.scope?.repository_link}
                   />
                 )}
               />
@@ -122,6 +124,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                   required
                   label="Documentation"
                   {...field}
+                  placeholder={audit?.scope?.documentation}
                 />
               )}
             />
@@ -138,7 +141,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                 control={control}
                 render={({ field }) => (
                   <Input
-                    
+                    placeholder={audit?.auditors?.first_name}
                     label="First Name"
                     onChange={(e) => setAuditorFirstName(e.target.value)}
                     value={auditorFirstName}
@@ -154,6 +157,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                 render={({ field }) => (
                   <Input
                     label="Last Name"
+                    placeholder={audit?.auditors?.last_name}
                     onChange={(e) => setAuditorLastName(e.target.value)}
                     value={auditorLastName}
                   />
@@ -187,7 +191,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                 control={control}
                 render={({ field }) => (
                   <Input
-                  
+                    placeholder={audit?.reviewed_by?.first_name}
                     label="First Name"
                     onChange={(e) => setReviewerFirstName(e.target.value)}
                     value={reviewerFirstName}
@@ -203,6 +207,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                 render={({ field }) => (
                   <Input
                     label="Last Name"
+                    placeholder={audit?.reviewed_by?.first_name}
                     onChange={(e) => setReviewerLastName(e.target.value)}
                     value={reviewerLastName}
                   />
@@ -243,6 +248,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                   padding: "10px",
                 }}
                 {...register("tests_status")}
+                placeholder={audit?.scope?.tests_status}
               >
                 <option value="FAILING">FAILING</option>
                 <option value="PASSING">PASSING</option>
@@ -255,7 +261,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
                 name="smart_contract_audited"
                 control={control}
                 render={({ field }) => (
-                  <Input label="Smart Contract Audited" {...field} />
+                  <Input placeholder={audit?.scope?.smart_contract_audited} label="Smart Contract Audited" {...field} />
                 )}
               />
             </Grid>
@@ -269,7 +275,7 @@ const Scope: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage
             }}
           >
             <Button size="sm" type="submit">
-              Create
+            {rout?.asPath==="/audit/new"?"Create":"Update"}
             </Button>
           </Grid>
         </form>

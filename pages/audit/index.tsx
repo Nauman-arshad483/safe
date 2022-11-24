@@ -18,6 +18,8 @@ const Audit: React.FC = () => {
 
   useEffect(() => {
     getAudits()
+    console.log(audits);
+    
   }, []);
 
   return (

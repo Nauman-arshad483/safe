@@ -15,7 +15,7 @@ import { CommitHashContext } from "../../context/CommitHashContext";
 import { FindingContext } from "../../context/FindingContext";
 import { Audit, CommitHash, Finding } from "../../types/types";
 import axios from "axios";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 interface IFormInput {
   version: string;
@@ -23,38 +23,64 @@ interface IFormInput {
   executive_summary: string;
 }
 
-const Finalizing: React.FC<{ setStage: Dispatch<SetStateAction<string>> }> = ({
-  setStage,
-}) => {
+const Finalizing: React.FC<{
+  setStage: Dispatch<SetStateAction<string>>;
+  audit?: Audit;
+}> = ({ setStage }) => {
   const { finding } = useContext(FindingContext) as FindingContextType;
   const { scope } = useContext(ScopeContext) as ScopeContextType;
   const { commitHash } = useContext(CommitHashContext) as CommitHashContextType;
   const { basicInfo } = useContext(BasicInfoContext) as BasicInfoContextType;
   const { control, handleSubmit } = useForm<IFormInput>();
   const [audit, setAudit] = useState<Audit | undefined>();
-  const [eSummary, setESummary] = useState("")
+  const [eSummary, setESummary] = useState("");
+  const rout = useRouter();
   const onSubmit: SubmitHandler<IFormInput> = async (data) => {
-    await axios
-      .post("/api/audit", {
-        version: data.version,
-        executive_summary: eSummary,
-        custom_audit_id: data.custom_audit_id,
-        client_name: basicInfo?.client_name!,
-        start_date: basicInfo?.start_date!,
-        end_date: basicInfo?.end_date!,
-        type_of_smart_contract: basicInfo?.type_of_smart_contract!,
-        scope: scope!,
-        commit_hashes: commitHash,
-        findings: finding,
-      })
-      .then((res) => {
-        console.log(res.data);
-      })
-      .catch((e) => {
-        console.log(e);
-      });
+    const auditUpdateId = Router.query.updateId;
+    if (Router.asPath === "/audit/new") {
+      console.log("new request");
+      await axios
+        .post("/api/audit", {
+          version: data.version,
+          executive_summary: eSummary,
+          custom_audit_id: data.custom_audit_id,
+          client_name: basicInfo?.client_name!,
+          start_date: basicInfo?.start_date!,
+          end_date: basicInfo?.end_date!,
+          type_of_smart_contract: basicInfo?.type_of_smart_contract!,
+          scope: scope!,
+          commit_hashes: commitHash,
+          findings: finding,
+        })
+        .then((res) => {
+          console.log(res.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    } else {
+      await axios
+        .patch(`/api/audit/update/${auditUpdateId}`, {
+          version: data.version,
+          executive_summary: eSummary,
+          custom_audit_id: data.custom_audit_id,
+          client_name: basicInfo?.client_name!,
+          start_date: basicInfo?.start_date!,
+          end_date: basicInfo?.end_date!,
+          type_of_smart_contract: basicInfo?.type_of_smart_contract!,
+          scope: scope!,
+          commit_hashes: commitHash,
+          findings: finding,
+        })
+        .then((res) => {
+          console.log(res.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    }
 
-    Router.push('/');
+    Router.push("/");
   };
   return (
     <>
@@ -139,45 +165,47 @@ const Finalizing: React.FC<{ setStage: Dispatch<SetStateAction<string>> }> = ({
                 />
               </Grid>
               <Spacer x={1} />
-            <Grid css={{ display: "flex", flexDirection: "column" }}>
-              <StyledInputLabel
-                css={{
-                  fontWeight: "$normal",
-                  fontSize: "14px",
-                  height: "42%",
-                  paddingLeft: "5px",
-                }}
-              >
-                Executive Summary
-              </StyledInputLabel>
-              <Spacer y={1} />
-              <select
-                style={{
-                  fontSize: "13px",
-                  background: "#f1f3f5",
-                  color: "black",
-                  borderRadius: "10px",
-                  border: "none",
-                  outline: "none",
-                  width: "11vw",
-                  height: "5.5vh",
-                  padding: "10px",
-                }}
-                onChange={e => setESummary(e.target.value)}
-              >
-                <option value="NOT_SECURE">Not Secure</option>
-                <option value="INSUFFICIENTLY_SECURED">Insufficently Secured</option>
-                <option value="SECURED">Secured</option>
-                <option value="WELL_SECURED">Well Secured</option>
-              </select>
-            </Grid>
+              <Grid css={{ display: "flex", flexDirection: "column" }}>
+                <StyledInputLabel
+                  css={{
+                    fontWeight: "$normal",
+                    fontSize: "14px",
+                    height: "42%",
+                    paddingLeft: "5px",
+                  }}
+                >
+                  Executive Summary
+                </StyledInputLabel>
+                <Spacer y={1} />
+                <select
+                  style={{
+                    fontSize: "13px",
+                    background: "#f1f3f5",
+                    color: "black",
+                    borderRadius: "10px",
+                    border: "none",
+                    outline: "none",
+                    width: "11vw",
+                    height: "5.5vh",
+                    padding: "10px",
+                  }}
+                  onChange={(e) => setESummary(e.target.value)}
+                >
+                  <option value="NOT_SECURE">Not Secure</option>
+                  <option value="INSUFFICIENTLY_SECURED">
+                    Insufficently Secured
+                  </option>
+                  <option value="SECURED">Secured</option>
+                  <option value="WELL_SECURED">Well Secured</option>
+                </select>
+              </Grid>
             </Grid.Container>
             <Spacer y={1.5} />
             <Grid
               css={{ display: "flex", justifyContent: "start", width: "100%" }}
             >
               <Button size="xs" type="submit">
-                Save Audit
+                {rout?.asPath === "/audit/new" ? "Save Audit" : "Update Audit"}
               </Button>
             </Grid>
           </form>

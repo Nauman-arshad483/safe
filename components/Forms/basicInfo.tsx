@@ -1,12 +1,26 @@
-import react, {useContext, Dispatch, SetStateAction} from "react";
+import react, {
+  useContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 import { Grid, Input } from "@nextui-org/react";
 import { useForm, SubmitHandler, Controller } from "react-hook-form";
-import { Container, Row, Text, Spacer, StyledInputLabel } from "@nextui-org/react";
+import {
+  Container,
+  Row,
+  Text,
+  Spacer,
+  StyledInputLabel,
+} from "@nextui-org/react";
 import { Button } from "@nextui-org/react";
-import {BasicInfoContextType} from '../../types/context.types'
-import {BasicInfoContext} from '../../context/BasicInfoContext'
-import {ETypeOfSmartContract} from '../../types/audit.enum'
-
+import { BasicInfoContextType } from "../../types/context.types";
+import { BasicInfoContext } from "../../context/BasicInfoContext";
+import { ETypeOfSmartContract } from "../../types/audit.enum";
+import { useRouter } from "next/router";
+import axios from "axios";
+import { Audit, CommitHash, Finding, Scope } from "../../types/types";
 interface IFormInput {
   client_name: string;
   start_date: string;
@@ -14,13 +28,34 @@ interface IFormInput {
   end_date?: string;
 }
 
-const BasicInfo: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setStage}) => {
-  const {basicInfo ,saveBasicInfo} = useContext(BasicInfoContext) as BasicInfoContextType;
+// type AuditT = {
+//   version: string,
+//   custom_audit_id: string,
+//   client_name: string,
+//   start_date: string,
+//   end_date: string
+//   type_of_smart_contract: string,
+//   scope: Scope
+//   commit_hashes: [CommitHash]
+//   findings: [Finding]
+// };
+// interface auditT {
+//   audit:Audit
+// }
+const BasicInfo: React.FC<{ setStage: Dispatch<SetStateAction<string>>,audit?:Audit }> = (
+  { setStage,audit },
+  
+) => {
+  const { basicInfo, saveBasicInfo } = useContext(
+    BasicInfoContext
+  ) as BasicInfoContextType;
   const { control, handleSubmit, register } = useForm<IFormInput>();
+  const rout = useRouter();
+
   const onSubmit: SubmitHandler<IFormInput> = (data) => {
-    saveBasicInfo(data)
-    setStage('Scope');
-  }
+    saveBasicInfo(data);
+    setStage("Scope");
+  };
 
   return (
     <Container css={{ height: "100%", width: "100%" }}>
@@ -32,15 +67,20 @@ const BasicInfo: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setS
       <Spacer y={0.5} />
       <hr />
       <Spacer y={1} />
-      <Row css={{height:'100%'}}>
-        <form onSubmit={handleSubmit(onSubmit)} style={{height:'100%', display:'flex', flexDirection:'column'}}>
-          <Grid.Container css={{width:'100%'}}>
+      <Row css={{ height: "100%" }}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          style={{ height: "100%", display: "flex", flexDirection: "column" }}
+        >
+          <Grid.Container css={{ width: "100%" }}>
             <Grid>
               <Controller
                 name="client_name"
                 control={control}
                 defaultValue=""
-                render={({ field }) => <Input required label="Client Name" {...field} />}
+                render={({ field }) => (
+                  <Input placeholder={audit?.client_name} required label="Client Name" {...field} />
+                )}
               />
             </Grid>
             <Spacer x={1} />
@@ -48,12 +88,14 @@ const BasicInfo: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setS
               <Controller
                 name="start_date"
                 control={control}
-                render={({ field }) => <Input required type='date' label="Start Date" {...field} />}
+                render={({ field }) => (
+                  <Input placeholder={audit?.start_date} required type="date" label="Start Date" {...field} />
+                )}
               />
             </Grid>
           </Grid.Container>
           <Spacer y={1} />
-          <Grid.Container css={{width:'100%'}}>
+          <Grid.Container css={{ width: "100%" }}>
             <Grid>
               <StyledInputLabel
                 css={{
@@ -62,6 +104,7 @@ const BasicInfo: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setS
                   height: "0%",
                   paddingLeft: "5px",
                 }}
+                placeholder={audit?.type_of_smart_contract}
               >
                 Type / Subtype
               </StyledInputLabel>
@@ -88,13 +131,17 @@ const BasicInfo: React.FC<{setStage: Dispatch<SetStateAction<string>>}> = ({setS
               <Controller
                 name="end_date"
                 control={control}
-                render={({ field }) => <Input type='date' label="End Date" {...field} />}
+                render={({ field }) => (
+                  <Input placeholder={audit?.end_date} type="date" label="End Date" {...field} />
+                )}
               />
             </Grid>
           </Grid.Container>
           <Spacer y={1.5} />
-          <Grid css={{display:'flex', justifyContent:'end'}}>
-          <Button size='sm' type="submit" >Create</Button>
+          <Grid css={{ display: "flex", justifyContent: "end" }}>
+            <Button size="sm" type="submit">
+              {rout?.asPath === "/audit/new" ? "Create" : "Update"}
+            </Button>
           </Grid>
         </form>
       </Row>

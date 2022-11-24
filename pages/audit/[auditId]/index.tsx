@@ -15,7 +15,7 @@ const SingleAuditInfo: NextPage = () => {
       .get(`/api/audit/${auditId}`)
       .then((resp) => {
         setAudit(resp.data);
-        console.log(resp.data)
+        console.log(resp.data);
       })
       .catch((err) => {
         console.log(err);
@@ -23,14 +23,10 @@ const SingleAuditInfo: NextPage = () => {
   };
 
   useEffect(() => {
-    singleAuditInfo()
-  },[])
+    singleAuditInfo();
+  }, [auditId]);
 
-  return <>{
-    audit ? <AuditInfo audit={audit!} auditId={auditId!}/> : <></>
-  }
-  
-  </>;
+  return <>{audit ? <AuditInfo audit={audit!} auditId={auditId!} /> : <></>}</>;
 };
 
 export default SingleAuditInfo;

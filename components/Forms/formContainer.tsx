@@ -1,4 +1,4 @@
-import react, { useState, Dispatch, SetStateAction } from "react";
+import react, { useState, Dispatch, SetStateAction, useEffect } from "react";
 import BasicInfo from "./basicInfo";
 import CommitHashes from "./commitHashes";
 import Findings from "./findings";
@@ -9,12 +9,32 @@ import ScopeProvider from "../../context/ScopeContext";
 import CommitHashProvider from "../../context/CommitHashContext";
 import FindingProvider from "../../context/FindingContext";
 import Finalizing from "./finalizing";
+import { Audit } from "../../types/types";
+import { useRouter } from "next/router";
+import axios from "axios";
 
 const FormContainer: React.FC<{
   stage: string;
   setStage: Dispatch<SetStateAction<string>>;
 }> = ({ stage, setStage }) => {
-
+  const [audit, setAudit] = useState<Audit>();
+  const { query } = useRouter();
+  const auditId = query.updateId;
+  const singleAuditInfo = async () => {
+    console.log("id is", auditId);
+    await axios
+      .get(`/api/audit/${auditId}`)
+      .then((resp) => {
+        setAudit(resp.data);
+        console.log(resp.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  useEffect(() => {
+    singleAuditInfo();
+  }, [query]);
 
   return (
     <>
@@ -23,15 +43,15 @@ const FormContainer: React.FC<{
           <CommitHashProvider>
             <FindingProvider>
               {stage === "Basic Info" ? (
-                <BasicInfo setStage={setStage} />
+                <BasicInfo setStage={setStage} audit={audit} />
               ) : stage === "Scope" ? (
-                <Scope setStage={setStage} />
+                <Scope setStage={setStage} audit={audit} />
               ) : stage === "Commit Hashes" ? (
-                <CommitHashes setStage={setStage} />
+                <CommitHashes setStage={setStage} audit={audit} />
               ) : stage === "Findings" ? (
-                <Findings setStage={setStage} />
+                <Findings setStage={setStage} audit={audit} />
               ) : (
-                <Finalizing setStage={setStage}/>
+                <Finalizing setStage={setStage} audit={audit} />
               )}
             </FindingProvider>
           </CommitHashProvider>

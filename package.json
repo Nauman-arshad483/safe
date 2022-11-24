@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "bootstrap": "./bashScript.sh",
+    "dev": "yarn bootstrap && next dev",
+    "build": "yarn bootstrap && next build",
     "start": "next start",
     "lint": "next lint"
   },

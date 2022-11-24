@@ -53,8 +53,8 @@ const AuditCard: React.FC<{ audit: any; key: number }> = ({ audit, key }) => {
               alignItems: "center",
             }}
           >
-            {audit.scope.repository_link} <Spacer x={1} /> | <Spacer x={1} />{" "}
-            {audit.scope.auditors.map((auditor: any) => (
+            {audit.scope?.repository_link} <Spacer x={1} /> | <Spacer x={1} />{" "}
+            {audit.scope?.auditors.map((auditor: any) => (
               <>
                 <>{auditor.first_name}</>
                 <>{auditor.last_name}</>
@@ -75,7 +75,7 @@ const AuditCard: React.FC<{ audit: any; key: number }> = ({ audit, key }) => {
           </Badge>
           <Spacer x={0.5} />
           <Badge color="error" size="lg">
-            {audit.scope.tests_status}
+            {audit.scope?.tests_status}
           </Badge>
         </Grid>
       </Card.Body>

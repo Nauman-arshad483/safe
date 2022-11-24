@@ -9,7 +9,7 @@ import {
   EFindingLocationType,
 } from "../../types/audit.enum";
 import WWEditor from "./wizywyg";
-import { Finding } from "../../types/types";
+import { Audit, Finding } from "../../types/types";
 import { FindingContextType } from "../../types/context.types";
 import { FindingContext } from "../../context/FindingContext";
 
@@ -25,8 +25,8 @@ interface IFormInput {
   };
 }
 
-const Findings: React.FC<{ setStage: Dispatch<SetStateAction<string>> }> = ({
-  setStage,
+const Findings: React.FC<{ setStage: Dispatch<SetStateAction<string>> ,audit?:Audit}> = ({
+  setStage,audit
 }) => {
   const { saveFinding } = useContext(FindingContext) as FindingContextType;
   const [description, setDescription] = useState("");
@@ -103,6 +103,7 @@ const Findings: React.FC<{ setStage: Dispatch<SetStateAction<string>> }> = ({
                   <Input
                     required
                     label="Title"
+                    placeholder={audit?.findings?.[0].title}
                     onChange={(e) => setTitle(e.target.value)}
                   />
                 )}
@@ -114,7 +115,7 @@ const Findings: React.FC<{ setStage: Dispatch<SetStateAction<string>> }> = ({
           <Spacer y={1} />
           <Grid.Container css={{ width: "100%" }}>
             <Grid>
-              <WWEditor setFunction={setDescription} />
+              <WWEditor  setFunction={setDescription} />
             </Grid>
           </Grid.Container>
 
